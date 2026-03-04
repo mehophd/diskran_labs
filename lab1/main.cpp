@@ -45,8 +45,8 @@ void FreeTVector(TVector *v) {
 }
 
 void RecapacityTVector(TVector *v, int newCapacity) {
-    if (newCapacity < 1) { 
-        newCapacity = 1; 
+    if (newCapacity < 1) {
+        newCapacity = 1;
     }
 
     TRecord *newData = (TRecord*)realloc(v->Data, sizeof(TRecord) * newCapacity);
@@ -60,8 +60,8 @@ void RecapacityTVector(TVector *v, int newCapacity) {
 }
 
 void PushTVector(TVector *v, const TRecord *rec) {
-    if (v->Size >= v->Capacity) { 
-        RecapacityTVector(v, v->Capacity * CAPACITY_COEFFICIENT); 
+    if (v->Size >= v->Capacity) {
+        RecapacityTVector(v, v->Capacity * CAPACITY_COEFFICIENT);
     }
 
     v->Data[v->Size] = *rec;
@@ -169,8 +169,7 @@ int main() {
 
         strncpy(rec.Date, keyStr, sizeof(rec.Date) - 1);
         rec.Date[sizeof(rec.Date) - 1] = '\0';
-        strncpy(rec.Value, valueStr, sizeof(rec.Value) - 1);
-        rec.Value[VALUE_SIZE - 1] = '\0';
+        memcpy(rec.Value, valueStr, VALUE_SIZE);
 
         PushTVector(&records, &rec);
 
@@ -179,7 +178,7 @@ int main() {
     RadixSort(records.Data, records.Size);
 
     for (int i = 0; i < records.Size; ++i) {
-        printf("%s\t%s\n", records.Data[i].Date, records.Data[i].Value);
+        printf("%s\t%.*s\n", records.Data[i].Date, VALUE_SIZE, records.Data[i].Value);
     }
 
     FreeTVector(&records);
