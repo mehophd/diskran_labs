@@ -1,0 +1,158 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[russian]{babel}
+
+\usepackage[left=2.5cm, right=1.5cm, top=2cm, bottom=2cm]{geometry}
+
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+\begin{center}
+\large
+МОСКОВСКИЙ АВИАЦИОННЫЙ ИНСТИТУТ\\ (НАЦИОНАЛЬНЫЙ ИССЛЕДОВАТЕЛЬСКИЙ УНИВЕРСИТЕТ)
+
+\vspace{20pt}
+
+Институт №8 <<Компьютерные науки и прикладная математика>>
+
+Кафедра 806 <<Вычислительная математика и программирование>>
+\end{center}
+
+\vspace{60pt}
+
+\begin{center}
+\bfseries
+\large
+Лабораторная работа № 1 по курсу дискрeтного анализа: сортировка за линейное время
+
+\vspace{54pt}
+
+\end{center}
+
+\vfill
+
+\begin{flushright}
+\large
+\begin{tabular}{rl}
+Выполнил: & Иванов Иван \\
+Группа: & М8О-207БВ-24 \\
+\end{tabular}
+\end{flushright}
+
+\vspace{92pt}
+
+\begin{center}
+\large
+Москва, \the\year
+\end{center}
+\newpage
+
+\section{Условие}
+
+\subsection{Общая постановка задачи}
+Требуется разработать программу, осуществляющую ввод пар «ключ-значение», их упорядочивание по возрастанию ключа указанным алгоритмом сортировки за линейное время и вывод отсортированной последовательности.
+
+\subsection{Вариант задания: 4-1}
+Поразрядная сортировка.\\
+Тип ключа: даты в формате DD.MM.YYYY, например 1.1.1, 1.9.2009, 01.09.2009, 31.12.2009.\\
+Тип значения: строки фиксированной длины 64 символа, во входных данных могут встретиться строки меньшей длины, при этом строка дополняется до 64-х нулевыми символами, которые не выводятся на экран.
+
+\section{Метод решения}
+
+Для решения задачи была реализована поразрядная сортировка (Radix Sort), которая обеспечивает линейную временную сложность O($n \times k$), где n - количество элементов, k - количество разрядов в ключе.
+
+\subsection{Преобразование ключа}
+Даты в формате DD.MM.YYYY преобразуются в целочисленный ключ формата YYYYMMDD для возможности сравнения:
+$Key = Year \times 10000 + Month \times 100 + Day$
+
+\subsection{Алгоритм сортировки}
+Поразрядная сортировка работает следующим образом:\\
+Находим максимальный ключ для определения количества разрядов. Для каждого разряда (от младшего к старшему) подсчитываем количество элементов с каждой цифрой в текущем разряде, вычисляем позиции элементов в результирующем массиве, распределяем элементы по позициям, копируем отсортированные данные обратно.
+
+\subsection{Архитектура программы}
+Программа состоит из:
+\begin{itemize}
+    \item Структуры \texttt{TRecord} для хранения пары ключ-значение
+    \item Структуры \texttt{TVector} для динамического массива записей
+    \item Функции управления вектором (\texttt{InitTVector}, \texttt{PushTVector}, \texttt{FreeTVector}, \texttt{RecapacityTVector})
+    \item Функция парсинга даты \texttt{ParseDate}
+    \item Функция поразрядной сортировки \texttt{RadixSort}
+\end{itemize}
+
+\section{Описание программы}
+
+\subsection{Структура файлов}
+\texttt{main.cpp} — файл программы
+
+\subsection{Основные типы данных}
+\begin{lstlisting}[language=C++, caption={Структуры}]
+struct TRecord {
+    int Key;
+    char Date[DATE_SIZE];
+    char Value[VALUE_SIZE];
+};
+
+struct TVector {
+    TRecord *Data;
+    int Size;
+    int Capacity;
+};
+\end{lstlisting}
+
+\subsection{Основные функции}
+\begin{itemize}
+    \item \texttt{InitTVector} - Инициализация вектора
+    \item \texttt{PushTVector} - Добавление элемента в вектор
+    \item \texttt{RecapacityTVector} - Изменение емкости вектора
+    \item \texttt{FreeTVector} - Уничтожение вектора
+    \item \texttt{ParseDate} - Парсинг даты в ключ
+    \item \texttt{GetMaxKey} - Поиск максимального ключа
+    \item \texttt{RadixSort} - Поразрядная сортировка
+\end{itemize}
+
+\section{Дневник отладки}
+Возникли проблемы с парсингом дат с однозначными числами. Было решено использовать sscanf с форматом\%d вместо \%02d. Была упощена вероятность того, что пользователь введет дату в неверном формате, была добавлена проверка на DATE\_FIELDS\_COUNT.
+
+\section{Недочеты}
+
+Программа не обрабатывает некорректные форматы дат (например, 32.13.2024). Отсутствует проверка на переполнение при выделении памяти для очень больших массивов.
+
+\section{Выводы}
+
+В ходе выполнения лабораторной работы была реализована программа сортировки пар «ключ-значение» с использованием поразрядной сортировки. Реализованный алгоритм может применяться для cортировки больших объемов данных с целочисленными ключами, сортировки дат, идентификаторов, телефонных номеров. Также алгоритм подходит для решения задач, где требуется устойчивая сортировка за линейное время. Основная сложность заключалась в работе с динамической памятью без использования STL, задача свелась к применению парадигм языка C. Также проблемы возникли при обработке различных форматов записи дат.
+\end{document}
